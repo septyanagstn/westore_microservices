@@ -9,3 +9,5 @@ inventory-service/docker/mysql/data/
 
 # Ignore environment files
 .env
+
+* text=auto
