@@ -1,6 +1,13 @@
 # Ignore MySQL database files
 inventory-service/docker/mysql/data/
 
+# Ignore MongoDB database files
+product-service/data/
+product-service/data/journal/
+product-service/data/*.wt
+product-service/data/*.log
+product-service/data/*.turtle
+
 # Ignore system files
 *.sock
 *.pid
@@ -10,4 +17,5 @@ inventory-service/docker/mysql/data/
 # Ignore environment files
 .env
 
+# Normalize line endings
 * text=auto
