@@ -1,0 +1,11 @@
+# Ignore MySQL database files
+inventory-service/docker/mysql/data/
+
+# Ignore system files
+*.sock
+*.pid
+*.log
+*.tmp
+
+# Ignore environment files
+.env
