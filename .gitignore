@@ -1,5 +1,7 @@
 # Ignore MySQL database files
 inventory-service/docker/mysql/data/
+order-service/mysql/
+api-gateway/volume-data/mysql_keycloak_data/
 
 # Ignore MongoDB database files
 product-service/data/
@@ -16,6 +18,28 @@ product-service/data/*.turtle
 
 # Ignore environment files
 .env
+
+# Ignore large files & build artifacts
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.out
+node_modules/
+target/
+bin/
+build/
+dist/
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.iml
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
 
 # Normalize line endings
 * text=auto
