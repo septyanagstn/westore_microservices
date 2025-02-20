@@ -7,11 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.testcontainers.containers.MySQLContainer;
+
+import com.github.tomakehurst.wiremock.http.Body;
+import com.westore.microservices.order.stubs.InventoryClientStub;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWireMock(port = 0)
 class OrderServiceApplicationTests {
 
     @ServiceConnection
@@ -33,12 +38,13 @@ class OrderServiceApplicationTests {
     void shouldSubmitOrder() {
         String submitOrderJson = """
                 {
-                     "skuCode": "Xiaomi 14T",
+                     "skuCode": "iphone_15",
                      "price": 1000,
-                     "quantity": 10
+                     "quantity": 1
                 }
                 """;
 
+        InventoryClientStub.stubInventoryCall("iphone_15", 1);
 
         var responseBodyString = RestAssured.given()
                 .contentType("application/json")
