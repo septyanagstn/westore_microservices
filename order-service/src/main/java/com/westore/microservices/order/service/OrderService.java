@@ -1,33 +1,49 @@
 package com.westore.microservices.order.service;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import com.westore.microservices.order.client.InventoryClient;
 import com.westore.microservices.order.dto.OrderRequest;
+import com.westore.microservices.order.event.OrderPlacedEvent;
 import com.westore.microservices.order.model.Order;
 import com.westore.microservices.order.repository.OrderRepository;
-
+import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final InventoryClient inventoryClient;
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     public void placeOrder(OrderRequest orderRequest) {
+
         var isProductInStock = inventoryClient.isInStock(orderRequest.skuCode(), orderRequest.quantity());
-        
-        if(isProductInStock){
+        if (isProductInStock) {
             Order order = new Order();
             order.setOrderNumber(UUID.randomUUID().toString());
-            order.setPrice(orderRequest.price());
+            order.setPrice(orderRequest.price().multiply(BigDecimal.valueOf(orderRequest.quantity())));
             order.setSkuCode(orderRequest.skuCode());
             order.setQuantity(orderRequest.quantity());
             orderRepository.save(order);
+
+            OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent();
+            orderPlacedEvent.setOrderNumber(order.getOrderNumber());
+            orderPlacedEvent.setEmail(orderRequest.userDetails().email());
+            orderPlacedEvent.setFirstName(orderRequest.userDetails().firstName() != null ? orderRequest.userDetails().firstName() : "Unknown");
+            orderPlacedEvent.setLastName(orderRequest.userDetails().lastName() != null ? orderRequest.userDetails().lastName() : "Unknown");
+            log.info("Start- Sending OrderPlacedEvent {} to Kafka Topic", orderPlacedEvent);
+            kafkaTemplate.send("order-placed", orderPlacedEvent);
+            log.info("End- Sending OrderPlacedEvent {} to Kafka Topic", orderPlacedEvent);
         } else {
             throw new RuntimeException("Product with SkuCode " + orderRequest.skuCode() + " is not in stock");
         }
