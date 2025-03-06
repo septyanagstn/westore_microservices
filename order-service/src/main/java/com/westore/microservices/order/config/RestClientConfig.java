@@ -10,6 +10,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import io.micrometer.observation.ObservationRegistry;
 
 import java.time.Duration;
 
@@ -18,6 +19,11 @@ public class RestClientConfig {
 
     @Value("${inventory.url}")
     private String inventoryServiceUrl;
+    private final ObservationRegistry observationRegistry;
+    
+    public RestClientConfig(ObservationRegistry observationRegistry) {
+        this.observationRegistry = observationRegistry;
+    }
 
     @Bean
     public InventoryClient inventoryClient() {
